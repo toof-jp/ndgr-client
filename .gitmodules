@@ -1,0 +1,3 @@
+[submodule "protobuf/nicolive-comment-protobuf"]
+	path = protobuf/nicolive-comment-protobuf
+	url = https://github.com/n-air-app/nicolive-comment-protobuf
