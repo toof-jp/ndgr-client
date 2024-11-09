@@ -63,7 +63,7 @@ pub async fn fetch_protobuf_stream<T: prost::Message + Default>(
             let chunk = chunk?;
             reader.push_chunk(&chunk);
 
-            while let Some(message) = reader.get_body() {
+            while let Some(message) = reader.get_message() {
                 let entry = match T::decode(message) {
                     Ok(entry) => entry,
                     Err(e) => {

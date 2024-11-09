@@ -33,7 +33,7 @@ impl ProtobufStreamReader {
         Some((offset, length))
     }
 
-    pub fn get_body(&mut self) -> Option<Bytes> {
+    pub fn get_message(&mut self) -> Option<Bytes> {
         let (offset, length) = self.read_length()?;
 
         if offset + length > self.buffer.len() {
