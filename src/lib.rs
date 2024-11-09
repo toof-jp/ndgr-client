@@ -1,8 +1,14 @@
 use anyhow::Result;
+use async_stream::try_stream;
+use futures_core::stream::Stream;
+use futures_util::StreamExt;
+use protobuf::chat::service::edge::{ChunkedEntry, ChunkedMessage};
+use protobuf_stream_reader::ProtobufStreamReader;
 
 use crate::program_info::ProgramInfo;
 
 pub mod program_info;
+pub mod protobuf_stream_reader;
 pub mod websocket;
 
 // TODO 番組終了の場合の処理
@@ -20,4 +26,53 @@ pub async fn fetch_program_info(url: &str) -> Result<ProgramInfo> {
     }
 
     Err(anyhow::anyhow!("program info not found"))
+}
+
+pub enum ViewQuery {
+    Now,
+    At(i64),
+}
+
+pub async fn fetch_chunked_entry(
+    url: &str,
+    query: &ViewQuery,
+) -> impl Stream<Item = Result<ChunkedEntry>> {
+    let at_str = match query {
+        ViewQuery::Now => "now".to_string(),
+        ViewQuery::At(at) => at.to_string(),
+    };
+    let url = format!("{url}?at={at_str}");
+
+    fetch_protobuf_stream::<ChunkedEntry>(&url).await
+}
+
+pub async fn fetch_chunked_message(url: &str) -> impl Stream<Item = Result<ChunkedMessage>> {
+    fetch_protobuf_stream::<ChunkedMessage>(url).await
+}
+
+pub async fn fetch_protobuf_stream<T: prost::Message + Default>(
+    url: &str,
+) -> impl Stream<Item = Result<T>> {
+    let response = reqwest::get(url).await;
+
+    try_stream! {
+        let mut stream = response?.bytes_stream();
+        let mut reader = ProtobufStreamReader::default();
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            reader.push_chunk(&chunk);
+
+            while let Some(message) = reader.get_body() {
+                let entry = match T::decode(message) {
+                    Ok(entry) => entry,
+                    Err(e) => {
+                        println!("decode error: {}", e);
+                        continue;
+                    }
+                };
+                yield entry
+            }
+        }
+    }
 }
