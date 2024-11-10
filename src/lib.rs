@@ -1,14 +1,13 @@
 use anyhow::Result;
 use async_stream::try_stream;
+use bytes::BytesMut;
 use futures_core::stream::Stream;
 use futures_util::StreamExt;
 use protobuf::chat::service::edge::{ChunkedEntry, ChunkedMessage};
-use protobuf_stream_reader::ProtobufStreamReader;
 
 use crate::program_info::ProgramInfo;
 
 pub mod program_info;
-pub mod protobuf_stream_reader;
 pub mod websocket;
 
 // TODO 番組終了の場合の処理
@@ -57,21 +56,14 @@ pub async fn fetch_protobuf_stream<T: prost::Message + Default>(
 
     try_stream! {
         let mut stream = response?.bytes_stream();
-        let mut reader = ProtobufStreamReader::default();
+        let mut buffer = BytesMut::new();
 
         while let Some(chunk) = stream.next().await {
             let chunk = chunk?;
-            reader.push_chunk(&chunk);
-
-            while let Some(message) = reader.get_message() {
-                let entry = match T::decode(message) {
-                    Ok(entry) => entry,
-                    Err(e) => {
-                        println!("decode error: {}", e);
-                        continue;
-                    }
-                };
-                yield entry
+            buffer.extend_from_slice(&chunk);
+            
+            while let Ok(message) = T::decode_length_delimited(&mut buffer) {
+                yield message;
             }
         }
     }
