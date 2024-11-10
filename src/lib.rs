@@ -61,7 +61,7 @@ pub async fn fetch_protobuf_stream<T: prost::Message + Default>(
         while let Some(chunk) = stream.next().await {
             let chunk = chunk?;
             buffer.extend_from_slice(&chunk);
-            
+
             while let Ok(message) = T::decode_length_delimited(&mut buffer) {
                 yield message;
             }

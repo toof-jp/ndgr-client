@@ -24,31 +24,25 @@ async fn main() {
         let stream = fetch_chunked_entry(&view_uri, &view_query).await;
         pin_mut!(stream);
 
-        while let Some(message_result) = stream.next().await {
-            match message_result {
-                Ok(message) => {
-                    println!("Received ChunkedEntry: {:?}", message);
+        while let Some(Ok(message)) = stream.next().await {
+            println!("Received ChunkedEntry: {:?}", message);
 
-                    match message.entry {
-                        Some(entry) => match entry {
-                            Entry::Next(next) => {
-                                println!("Next: {:?}", next.at);
-                                view_query = ViewQuery::At(next.at);
-                            }
-                            Entry::Segment(segment) => {
-                                let stream = fetch_chunked_message(&segment.uri).await;
-                                pin_mut!(stream);
-
-                                while let Some(message_result) = stream.next().await {
-                                    println!("Received ChunkedMessage: {:?}", message_result);
-                                }
-                            }
-                            _ => (),
-                        },
-                        None => println!("No entry"),
+            if let Some(entry) = message.entry {
+                match entry {
+                    Entry::Next(next) => {
+                        println!("Next: {:?}", next.at);
+                        view_query = ViewQuery::At(next.at);
                     }
+                    Entry::Segment(segment) => {
+                        let stream = fetch_chunked_message(&segment.uri).await;
+                        pin_mut!(stream);
+
+                        while let Some(message_result) = stream.next().await {
+                            println!("Received ChunkedMessage: {:?}", message_result);
+                        }
+                    }
+                    _ => (),
                 }
-                Err(e) => eprintln!("Error: {}", e),
             }
         }
     }
