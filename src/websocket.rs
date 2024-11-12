@@ -31,24 +31,24 @@ pub async fn fetch_ndgr_view_uri(web_socket_url: &str) -> Result<String> {
     Err(anyhow::anyhow!("view uri not found"))
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 struct InitialConnectionMessage {
     r#type: String,
     data: InitialConnectionData,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 struct InitialConnectionData {
     reconnect: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 struct ResponseMessage {
     r#type: String,
     data: Value,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MessageServerData {
     view_uri: String,
