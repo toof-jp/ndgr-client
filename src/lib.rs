@@ -1,12 +1,14 @@
 use anyhow::Result;
-use async_stream::try_stream;
+use async_stream::{stream, try_stream};
 use bytes::BytesMut;
+use futures::pin_mut;
 use futures_core::stream::Stream;
 use futures_util::StreamExt;
-use protobuf::chat::service::edge::{ChunkedEntry, ChunkedMessage};
+use protobuf::chat::service::edge::{chunked_entry::Entry, ChunkedEntry, ChunkedMessage};
 
 use crate::program_info::ProgramInfo;
 
+pub mod comment_buffer;
 pub mod program_info;
 pub mod websocket;
 
@@ -64,6 +66,37 @@ pub async fn fetch_protobuf_stream<T: prost::Message + Default>(
 
             while let Ok(message) = T::decode_length_delimited(&mut buffer) {
                 yield message;
+            }
+        }
+    }
+}
+
+pub async fn stream_chunked_message<'a>(
+    view_uri: &'a str,
+) -> impl Stream<Item = ChunkedMessage> + 'a {
+    stream! {
+        let mut view_query = ViewQuery::Now;
+        loop {
+            let stream = fetch_chunked_entry(view_uri, &view_query).await;
+            pin_mut!(stream);
+
+            while let Some(Ok(message)) = stream.next().await {
+                if let Some(entry) = message.entry {
+                    match entry {
+                        Entry::Next(next) => {
+                            view_query = ViewQuery::At(next.at);
+                        }
+                        Entry::Segment(segment) => {
+                            let stream = fetch_chunked_message(&segment.uri).await;
+                            pin_mut!(stream);
+
+                            while let Some(Ok(message)) = stream.next().await {
+                                yield message;
+                            }
+                        }
+                        _ => (),
+                    }
+                }
             }
         }
     }
