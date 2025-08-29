@@ -1,6 +1,8 @@
 # ndgr-client
 niconico Live comment viewer
 
+WIP デバッグ出力のストリームしか見れません
+
 ## Dependency
 To build, you need to install `protoc` (Protocol Buffer Compiler).
 https://docs.rs/prost-build/latest/prost_build/#sourcing-protoc
