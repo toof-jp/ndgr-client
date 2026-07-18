@@ -1,25 +1,19 @@
-use std::{
-    env,
-    io::{stdout, Write},
-    time::Duration,
-};
+use std::env;
+use std::io::{Write, stdout};
+use std::time::Duration;
 
 use anyhow::Result;
-use crossterm::{
-    cursor,
-    event::{self, DisableMouseCapture, Event as CEvent, KeyCode, KeyEvent},
-    terminal::{
-        disable_raw_mode, enable_raw_mode, Clear, ClearType, EnterAlternateScreen,
-        LeaveAlternateScreen,
-    },
-    ExecutableCommand,
+use crossterm::event::{self, DisableMouseCapture, Event as CEvent, KeyCode, KeyEvent};
+use crossterm::terminal::{
+    Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
 };
-use futures::{pin_mut, StreamExt};
-use ndgr_client::{
-    comment_buffer::CommentBuffer, fetch_program_info, stream_chunked_message,
-    websocket::WebSocketClient,
-};
-use tokio::{select, sync::mpsc};
+use crossterm::{ExecutableCommand, cursor};
+use futures::{StreamExt, pin_mut};
+use ndgr_client::comment_buffer::CommentBuffer;
+use ndgr_client::websocket::WebSocketClient;
+use ndgr_client::{fetch_program_info, stream_chunked_message};
+use tokio::select;
+use tokio::sync::mpsc;
 
 #[tokio::main]
 async fn main() -> Result<()> {

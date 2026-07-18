@@ -3,11 +3,10 @@ use std::sync::Arc;
 use anyhow::Result;
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
-use tokio::sync::{
-    mpsc::{self, Sender},
-    Mutex,
-};
-use tokio_tungstenite::{connect_async, tungstenite::Message};
+use tokio::sync::Mutex;
+use tokio::sync::mpsc::{self, Sender};
+use tokio_tungstenite::connect_async;
+use tokio_tungstenite::tungstenite::Message;
 
 pub struct WebSocketClient {
     tx: Sender<String>,
@@ -163,11 +162,17 @@ struct InitialConnectionData {
 #[serde(tag = "type")]
 #[serde(rename_all = "camelCase")]
 enum ResponseMessage {
-    MessageServer { data: MessageServerData },
-    Seat { data: SeatData },
+    MessageServer {
+        data: MessageServerData,
+    },
+    Seat {
+        data: SeatData,
+    },
     Ping,
     #[allow(dead_code)]
-    Reconnect { data: ReconnectData },
+    Reconnect {
+        data: ReconnectData,
+    },
     ServerTime,
     Stream,
     Schedule,

@@ -1,5 +1,6 @@
-use futures::{pin_mut, StreamExt};
-use ndgr_client::{fetch_program_info, stream_chunked_message, websocket::WebSocketClient};
+use futures::{StreamExt, pin_mut};
+use ndgr_client::websocket::WebSocketClient;
+use ndgr_client::{fetch_program_info, stream_chunked_message};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

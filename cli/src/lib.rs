@@ -4,12 +4,14 @@ use bytes::BytesMut;
 use futures::pin_mut;
 use futures_core::stream::Stream;
 use futures_util::StreamExt;
-use protobuf::chat::service::edge::{chunked_entry::Entry, ChunkedEntry, ChunkedMessage};
+use protobuf::chat::service::edge::chunked_entry::Entry;
+use protobuf::chat::service::edge::{ChunkedEntry, ChunkedMessage};
 
 use crate::program_info::ProgramInfo;
 
 pub mod comment_buffer;
 pub mod program_info;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod websocket;
 
 // TODO 番組終了の場合の処理
@@ -37,7 +39,7 @@ pub enum ViewQuery {
 pub async fn fetch_chunked_entry(
     url: &str,
     query: &ViewQuery,
-) -> impl Stream<Item = Result<ChunkedEntry>> {
+) -> impl Stream<Item = Result<ChunkedEntry>> + use<> {
     let at_str = match query {
         ViewQuery::Now => "now".to_string(),
         ViewQuery::At(at) => at.to_string(),
@@ -47,13 +49,15 @@ pub async fn fetch_chunked_entry(
     fetch_protobuf_stream::<ChunkedEntry>(&url).await
 }
 
-pub async fn fetch_chunked_message(url: &str) -> impl Stream<Item = Result<ChunkedMessage>> {
+pub async fn fetch_chunked_message(
+    url: &str,
+) -> impl Stream<Item = Result<ChunkedMessage>> + use<> {
     fetch_protobuf_stream::<ChunkedMessage>(url).await
 }
 
 pub async fn fetch_protobuf_stream<T: prost::Message + Default>(
     url: &str,
-) -> impl Stream<Item = Result<T>> {
+) -> impl Stream<Item = Result<T>> + use<T> {
     let response = reqwest::get(url).await;
 
     try_stream! {
