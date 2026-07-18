@@ -22,12 +22,13 @@ impl WebSocketClient {
         let (tx, mut rx) = mpsc::channel(100);
 
         write
-            .send(Message::Text(serde_json::to_string(
-                &InitialConnectionMessage {
+            .send(Message::Text(
+                serde_json::to_string(&InitialConnectionMessage {
                     r#type: "startWatching".to_string(),
                     data: InitialConnectionData { reconnect: false },
-                },
-            )?))
+                })?
+                .into(),
+            ))
             .await?;
 
         let mut view_uri = None;
@@ -64,7 +65,7 @@ impl WebSocketClient {
                 write_clone
                     .lock()
                     .await
-                    .send(Message::Text(r#"{"type":"keepSeat"}"#.to_string()))
+                    .send(Message::Text(r#"{"type":"keepSeat"}"#.into()))
                     .await
                     .unwrap();
             }
@@ -77,10 +78,13 @@ impl WebSocketClient {
                     .lock()
                     .await
                     // TODO
-                    .send(Message::Text(format!(
-                        r#"{{"type":"postComment","data":{{"text":"{}"}}}}"#,
-                        message
-                    )))
+                    .send(Message::Text(
+                        format!(
+                            r#"{{"type":"postComment","data":{{"text":"{}"}}}}"#,
+                            message
+                        )
+                        .into(),
+                    ))
                     .await
                     .unwrap();
             }
@@ -95,7 +99,7 @@ impl WebSocketClient {
                             write
                                 .lock()
                                 .await
-                                .send(Message::Text(r#"{"type":"pong"}"#.to_string()))
+                                .send(Message::Text(r#"{"type":"pong"}"#.into()))
                                 .await
                                 .unwrap();
                         }
@@ -127,12 +131,13 @@ pub async fn fetch_ndgr_view_uri(web_socket_url: &str) -> Result<String> {
     let (mut write, mut read) = ws_stream.split();
 
     write
-        .send(Message::Text(serde_json::to_string(
-            &InitialConnectionMessage {
+        .send(Message::Text(
+            serde_json::to_string(&InitialConnectionMessage {
                 r#type: "startWatching".to_string(),
                 data: InitialConnectionData { reconnect: false },
-            },
-        )?))
+            })?
+            .into(),
+        ))
         .await?;
 
     while let Some(msg) = read.next().await {
