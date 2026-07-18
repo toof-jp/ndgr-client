@@ -100,7 +100,7 @@ impl WebSocketClient {
                                 .await
                                 .unwrap();
                         }
-                        ResponseMessage::Reconnect { data } => {
+                        ResponseMessage::Reconnect { data: _ } => {
                             // TODO
                         }
                         _ => (),
@@ -166,11 +166,14 @@ enum ResponseMessage {
     MessageServer { data: MessageServerData },
     Seat { data: SeatData },
     Ping,
+    #[allow(dead_code)]
     Reconnect { data: ReconnectData },
     ServerTime,
     Stream,
     Schedule,
     Statistics,
+    #[serde(other)]
+    Unknown,
 }
 
 #[derive(Debug, Deserialize)]
@@ -187,6 +190,7 @@ struct SeatData {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 struct ReconnectData {
     audience_token: String,
     wait_time_sec: i64,
