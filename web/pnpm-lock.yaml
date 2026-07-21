@@ -13,7 +13,7 @@ importers:
         version: 19.2.7
       react-dom:
         specifier: ^19.2.0
-        version: 19.2.7(react@19.2.7)
+        version: 19.2.8(react@19.2.7)
     devDependencies:
       '@types/react':
         specifier: ^19.2.0
@@ -993,10 +993,10 @@ packages:
     resolution: {integrity: sha512-Qb1gy5OrP5+zDf2Bvnzdl3jsTf1qXVMazbvCoKhtKqVs4/YK4ozX4gKQJJVyNe+cajNPn0KoC0MC3FUmaHWEmQ==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
 
-  react-dom@19.2.7:
-    resolution: {integrity: sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==}
+  react-dom@19.2.8:
+    resolution: {integrity: sha512-rVprimfGBG3DR+Tq0IQG2DT5PxKth1WIGDmj5yPmlzr4YBe7uyE+Du4oVqTDXZSHGGGXRtTJEGSSePyQCMBglQ==}
     peerDependencies:
-      react: ^19.2.7
+      react: ^19.2.8
 
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
@@ -1741,7 +1741,7 @@ snapshots:
       ansi-styles: 5.2.0
       react-is: 17.0.2
 
-  react-dom@19.2.7(react@19.2.7):
+  react-dom@19.2.8(react@19.2.7):
     dependencies:
       react: 19.2.7
       scheduler: 0.27.0
